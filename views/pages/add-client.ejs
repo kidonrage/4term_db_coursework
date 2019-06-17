@@ -1,0 +1,39 @@
+<% include ./partials/header %>
+
+<div class="container">
+	<div class="row">
+		<form action="../test/add" method="POST" class="col-10">
+			<div class="form-group">
+				<label for="name">Имя покупателя:</label>
+				<input type="text" name="name" class="form-control">
+			</div>
+			<div class="form-group">
+				<label for="inn">ИНН покупателя:</label>
+				<input type="text" name="inn" class="form-control">
+			</div>
+			<div class="form-group">
+				<label for="director">Руководитель фирмы:</label>
+				<input type="text" name="director" class="form-control">
+			</div>
+			<div class="form-group">
+				<label for="phoneDir">Телефон директора:</label>
+				<input type="text" name="phoneDir" class="form-control">
+			</div>
+			<div class="form-group">
+				<label for="address">Юридический адрес:</label>
+				<input type="text" name="address" class="form-control">
+			</div>
+			<div class="form-group">
+				<label for="bank">Банк покупателя:</label>
+				<input type="text" name="bank" class="form-control">
+			</div>
+			<div class="form-group">
+				<label for="account">Номер счета в банке:</label>
+				<input type="text" name="account" class="form-control">
+			</div>
+			<button type="submit" class="btn btn-primary">Добавить</button>
+		</form>
+	</div>
+</div>
+
+<% include ./partials/footer %>

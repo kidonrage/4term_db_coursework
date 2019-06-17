@@ -1,0 +1,62 @@
+<% include ./partials/header %>
+
+<div class="container-fluid">
+	<% if (items.length > 0) { %>
+		<div class="row">
+			<div class="col-12">
+				<a href="sells/add" class="btn btn-success btn-lg add-button">Добавить запись о продаже</a>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-12">
+				<div class="table-wrapper">
+					<table class="table">
+						<thead>
+							<tr>
+								<th style="width: 20px">№</th>
+								<th>Покупатель</th>
+								<th>ИНН</th>
+								<th>Руководитель</th>
+								<th>Телефон директора</th>
+								<th>Юридический адрес</th>
+								<th>Банк</th>
+								<th>Номер счета</th>
+								<th>Управление</th>
+							</tr>
+						</thead>
+						<tbody>
+							<% items.forEach(function(item, index) { %>
+								<tr>
+									<td style="width: 20px"><%= index + 1 %></td>
+									<td><%= item.Client %></td>
+									<td><%= item.InnClient %></td>
+									<td><%= item.Director %></td>
+									<td><%= item.PhoneDir %></td>
+									<td><%= item.AddressClient %></td>
+									<td><%= item.BankClient %></td>
+									<td><%= item.AccountClient %></td>
+									<td>
+										<a href="/test/edit/<%= item.id %>" class="btn btn-success">Редактировать</a>
+										<a href="/test/delete/<%= item.InnClient %>" class="btn btn-danger">Удалить</a>
+									</td>
+								</tr>
+							<% }); %>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<% } else { %>
+			<div class="notfound-container">
+				<span class="notfound-sign">Упс!</span>
+				<p>В базе пока нет записей о совершенных продажах.</p>
+				<a href="test/add" class="btn btn-success btn-lg add-button">Добавить запись о продаже</a>
+			</div>
+		<% } %>
+	</div>
+
+<script>
+	$('.sells-link').addClass('active');
+</script>
+
+<% include ./partials/footer %>

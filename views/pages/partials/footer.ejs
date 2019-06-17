@@ -1,0 +1,140 @@
+<button type="button" class="btn btn-primary data-popup-btn" data-toggle="modal" data-target="#helpdataModal">
+	Данные
+</button>
+
+<div class="modal fade" id="helpdataModal" tabindex="-1" role="dialog" aria-labelledby="helpdataModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="helpdataModalLabel">Управление справочными таблицами</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+				<div class="modal-nav">
+					<nav class="nav flex-column">
+						<a class="nav-item nav-link active" id="nav-categories-tab" data-toggle="tab" href="#nav-categories" role="tab" aria-controls="nav-categories" aria-selected="true">Категории товаров</a>
+						<a class="nav-item nav-link" id="nav-banks-tab" data-toggle="tab" href="#nav-banks" role="tab" aria-controls="nav-banks" aria-selected="false">Банки</a>
+						<a class="nav-item nav-link" id="nav-manufacturers-tab" data-toggle="tab" href="#nav-manufacturers" role="tab" aria-controls="nav-manufacturers" aria-selected="false">Изготовители</a>
+					</nav>
+				</div>
+				<div class="modal-info">
+					<div class="tab-content" id="nav-tabContent">
+						<div class="tab-pane fade show active" id="nav-categories" role="tabpanel" aria-labelledby="nav-categories-tab">
+							<ul></ul>
+							<form class="helpDataAddForm" method="POST" action="/addHelpData">
+								<input type="hidden" name="target" value="goodsCategories">
+								<div class="form-row">
+									<div class="col-10">
+										<input type="text" name="name" class="form-control" placeholder="Введите имя для категории">
+									</div>
+									<div class="col-2">
+										<button type="submit" class="btn btn-primary mb-2">Добавить</button>
+									</div>
+								</div>
+							</form>
+						</div>
+						<div class="tab-pane fade" id="nav-banks" role="tabpanel" aria-labelledby="nav-banks-tab">
+							<ul></ul>
+							<form class="helpDataAddForm" method="POST" action="/addHelpData">
+								<input type="hidden" name="target" value="banks">
+								<div class="form-row">
+									<div class="col-10">
+										<input type="text" name="name" class="form-control" placeholder="Введите название банка">
+									</div>
+									<div class="col-2">
+										<button type="submit" class="btn btn-primary mb-2">Добавить</button>
+									</div>
+								</div>
+							</form>
+						</div>
+						<div class="tab-pane fade" id="nav-manufacturers" role="tabpanel" aria-labelledby="nav-manufacturers-tab">
+							<ul></ul>
+							<form class="helpDataAddForm" method="POST" action="/addHelpData">
+								<input type="hidden" name="target" value="manufacturers">
+								<div class="form-row">
+									<div class="col-10">
+										<input type="text" name="name" class="form-control" placeholder="Введите имя производителя">
+									</div>
+									<div class="col-2">
+										<button type="submit" class="btn btn-primary mb-2">Добавить</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+      </div>
+      <%# <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div> %>
+    </div>
+  </div>
+</div>
+
+<script>
+	function getHelpData(target, ulObject) {
+		$.ajax({
+			type: 'GET',
+			url: 'http://localhost:8080/getHelpData/' + target,
+			dataType: 'json'
+		})
+		.done(function(data) {
+			ulObject.empty()
+			data.forEach(row => {
+				ulObject.append('<li><span>'+row.name+'</span><a href="/deleteHelpData/' + target + '/' + row.id + '">×</a></li>');
+			});
+		})
+		.fail(function(jqXHR, textStatus, err) {
+			console.log('Error getting help data:', textStatus);
+		})
+	}
+
+	$('#helpdataModal').on('show.bs.modal', function (event) {
+		getHelpData('goodsCategories', $('#nav-categories ul'));
+	})
+	$( "#nav-categories-tab" ).click(function() {
+		getHelpData('goodsCategories', $('#nav-categories ul'));
+	});
+	$( "#nav-banks-tab" ).click(function() {
+		getHelpData('banks', $('#nav-banks ul'));
+	});
+	$( "#nav-manufacturers-tab" ).click(function() {
+		getHelpData('manufacturers', $('#nav-manufacturers ul'));
+	});
+
+	$('.helpDataAddForm').submit(function(e) {
+		var $form = $(this);
+		$.ajax({
+			url: '../addHelpData',
+			type:'POST',
+			data: $form.serialize()
+		}).done(response => {
+			$form.parent().children('ul').append('<li><span>'+response.request.name+'</span><a href="/deleteHelpData/' + response.request.target + '/' + response.id + '">×</a></li>');
+			$form.find('input[name="name"]').val("");
+			console.log(response);
+		}).fail(function() {
+			console.log('fail');
+		});
+		e.preventDefault(); 
+	});
+
+	$('#helpdataModal').on('click','.tab-pane ul li a',function(e){
+		e.preventDefault()
+		$.ajax({
+			url: $(this).attr("href"),
+			type:'GET'
+		}).done(response => {
+			$(this).parent().remove()
+			console.log(response);
+		}).fail(function() {
+			console.log('fail');
+		});
+	});
+	
+</script>
+
+</body>
+</html>
