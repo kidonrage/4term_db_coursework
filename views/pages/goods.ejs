@@ -4,7 +4,7 @@
 	<% if (items.length > 0) { %>
 		<div class="row">
 			<div class="col-12">
-				<a href="clients/add" class="btn btn-success btn-lg add-button">Добавить товар</a>
+				<button type="button" class="btn btn-primary add-button" data-toggle="modal" data-target="#addModal">Добавить товар</button>
 			</div>
 		</div>
 		<div class="row">
@@ -14,13 +14,14 @@
 						<thead>
 							<tr>
 								<th style="width: 20px">№</th>
-								<th>Покупатель</th>
-								<th>ИНН</th>
-								<th>Руководитель</th>
-								<th>Телефон директора</th>
-								<th>Юридический адрес</th>
-								<th>Банк</th>
-								<th>Номер счета</th>
+								<th style="width: 75px">Фото</th>
+								<th>Название</th>
+								<th>Категория</th>
+								<th>Дата пр-ва</th>
+								<th>Срок хранения, дней</th>
+								<th>Кол-во</th>
+								<th>Цена за единицу</th>
+								<th>Производитель</th>
 								<th>Управление</th>
 							</tr>
 						</thead>
@@ -28,16 +29,17 @@
 							<% items.forEach(function(item, index) { %>
 								<tr>
 									<td style="width: 20px"><%= index + 1 %></td>
-									<td><%= item.Client %></td>
-									<td><%= item.InnClient %></td>
-									<td><%= item.Director %></td>
-									<td><%= item.PhoneDir %></td>
-									<td><%= item.AddressClient %></td>
-									<td><%= item.BankClient %></td>
-									<td><%= item.AccountClient %></td>
+									<td style="width: 75px"><img src="../public/uploads/<%= item.Picture %>"></td>
+									<td><%= item.Goods %></td>
+									<td><%= item.Category %></td>
+									<td><%= item.DateStart.toLocaleDateString("en-US") %></td>
+									<td><%= item.Period %></td>
+									<td><%= item.Count %> <%= item.Unit %></td>
+									<td><%= item.CostUnit %></td>
+									<td><%= item.Manufacturer %></td>
 									<td>
-										<a href="/test/edit/<%= item.id %>" class="btn btn-success">Редактировать</a>
-										<a href="/test/delete/<%= item.InnClient %>" class="btn btn-danger">Удалить</a>
+										<a href="/goods/edit/<%= item.GoodsID %>" class="btn btn-success">Редактировать</a>
+										<a href="/goods/delete/<%= item.GoodsID %>" class="btn btn-danger">Удалить</a>
 									</td>
 								</tr>
 							<% }); %>
@@ -50,13 +52,91 @@
 			<div class="notfound-container">
 				<span class="notfound-sign">Упс!</span>
 				<p>В базе пока нет записей о товарах.</p>
-				<a href="test/add" class="btn btn-success btn-lg add-button">Добавить товар</a>
+				<a class="btn btn-lg btn-success btn-primary" href="#addModal" data-toggle="modal">Добавить товар</a>
 			</div>
 		<% } %>
 	</div>
 
+
+	<!-- Modal -->
+	<div class="modal hide fade" id="addModal" tabindex="-2" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="addModalLabel">Добавление товара</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<form name="addForm" action="../goods/add" method="POST" enctype="multipart/form-data">
+					<div class="modal-body">
+						<div class="form-group">
+							<div class="custom-file">
+								<input type="file" class="custom-file-input" accept="image/x-png,image/gif,image/jpeg" name="picture" id="addCustomFile">
+								<label class="custom-file-label" for="addCustomFile">Choose file</label>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="goodsName">Имя:</label>
+							<input type="text" name="goodsName" id="goodsName" class="form-control" required>
+						</div>
+						<div class="form-group">
+							<div class="label-wrapper">
+								<label for="category">Категория:</label>
+								<a href="#helpdataModal" class="addExtraHelpData" data-dismiss="modal" data-toggle="modal">Добавить</a>
+							</div>
+							<select name="category" disabled class="form-control" id="category" required></select>
+						</div>
+						<div class="form-group">
+							<label for="dateStart">Дата изготовления</label>
+							<input type="date" name="dateStart" class="form-control" id="dateStart" required>
+						</div>
+						<div class="form-group">
+							<label for="period">Срок хранения товара в днях:</label>
+							<input type="number" name="period" class="form-control" id="period" required>
+						</div>
+						<div class="form-row">
+							<div class="form-group col-md-4">
+								<label for="count">Количество:</label>
+								<input type="number" name="count" class="form-control" id="count" required>
+							</div>
+							<div class="form-group col-md-4">
+								<label for="unit">Единицы измерения:</label>
+								<input type="text" name="unit" class="form-control" id="unit" required>
+							</div>
+							<div class="form-group col-md-4">
+								<label for="costUnit">Цена за единицу:</label>
+								<input type="number" name="costUnit" class="form-control" id="costUnit" required>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="label-wrapper">
+								<label for="manufacturer">Производитель:</label>
+								<a href="#helpdataModal" class="addExtraHelpData" data-dismiss="modal" data-toggle="modal">Добавить</a>
+							</div>
+							<select type="text" name="manufacturer" disabled class="form-control" id="manufacturer" required></select>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-primary">Добавить</button> 
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
 <script>
 	$('.goods-link').addClass('active');
+
+	$( "a.addExtraHelpData" ).click(function() {
+		$('#helpdataModal .modal-header .close').hide()
+		$('#helpdataModal .modal-header').append('<a href="#addModal" class="back-button" data-dismiss="modal" data-toggle="modal" >&rsaquo;</a>')
+	});
+
+	$( 'button[type="submit"]' ).click(function() {
+		console.log(document.getElementById('addCustomFile').files);
+		console.log($('form[name="addForm"]').picture)
+	});
 </script>
 
 <% include ./partials/footer %>

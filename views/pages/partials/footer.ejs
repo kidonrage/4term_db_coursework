@@ -2,7 +2,7 @@
 	Данные
 </button>
 
-<div class="modal fade" id="helpdataModal" tabindex="-1" role="dialog" aria-labelledby="helpdataModalLabel" aria-hidden="true">
+<div class="modal hide fade" id="helpdataModal" tabindex="-1" role="dialog" aria-labelledby="helpdataModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -75,26 +75,14 @@
 </div>
 
 <script>
-	function getHelpData(target, ulObject) {
-		$.ajax({
-			type: 'GET',
-			url: 'http://localhost:8080/getHelpData/' + target,
-			dataType: 'json'
-		})
-		.done(function(data) {
-			ulObject.empty()
-			data.forEach(row => {
-				ulObject.append('<li><span>'+row.name+'</span><a href="/deleteHelpData/' + target + '/' + row.id + '">×</a></li>');
-			});
-		})
-		.fail(function(jqXHR, textStatus, err) {
-			console.log('Error getting help data:', textStatus);
-		})
-	}
-
 	$('#helpdataModal').on('show.bs.modal', function (event) {
 		getHelpData('goodsCategories', $('#nav-categories ul'));
-	})
+	});
+	$('#helpdataModal').on('hidden.bs.modal', function (event) {
+		$('#helpdataModal .modal-header .back-button').remove()
+		$('#helpdataModal .modal-header .close').show()
+	});
+
 	$( "#nav-categories-tab" ).click(function() {
 		getHelpData('goodsCategories', $('#nav-categories ul'));
 	});
@@ -103,37 +91,7 @@
 	});
 	$( "#nav-manufacturers-tab" ).click(function() {
 		getHelpData('manufacturers', $('#nav-manufacturers ul'));
-	});
-
-	$('.helpDataAddForm').submit(function(e) {
-		var $form = $(this);
-		$.ajax({
-			url: '../addHelpData',
-			type:'POST',
-			data: $form.serialize()
-		}).done(response => {
-			$form.parent().children('ul').append('<li><span>'+response.request.name+'</span><a href="/deleteHelpData/' + response.request.target + '/' + response.id + '">×</a></li>');
-			$form.find('input[name="name"]').val("");
-			console.log(response);
-		}).fail(function() {
-			console.log('fail');
-		});
-		e.preventDefault(); 
-	});
-
-	$('#helpdataModal').on('click','.tab-pane ul li a',function(e){
-		e.preventDefault()
-		$.ajax({
-			url: $(this).attr("href"),
-			type:'GET'
-		}).done(response => {
-			$(this).parent().remove()
-			console.log(response);
-		}).fail(function() {
-			console.log('fail');
-		});
-	});
-	
+	});	
 </script>
 
 </body>

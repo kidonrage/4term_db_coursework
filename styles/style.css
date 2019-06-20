@@ -12,6 +12,9 @@ button:focus{
 	padding-bottom: 0;
 	z-index: 1;
 }
+.nav-tabs {
+	border-bottom: none;
+}
 .nav-link {
 	color: #ffffff;
 }
@@ -85,6 +88,9 @@ button:focus{
 	padding-left: 16px;
 	color: #000000;
 }
+#helpdataModal .modal-nav a.active {
+	background: rgba(0,0,0,.05);
+}
 #helpdataModal .modal-nav a:hover {
 	background: rgba(0,0,0,.1);
 }
@@ -138,4 +144,31 @@ button:focus{
 }
 #helpdataModal .modal-info .tab-pane form button {
 	margin-bottom: 0 !important; 
+}
+
+#addModal .modal-body {
+	max-height: 600px;
+	overflow-y: auto;
+	overflow-x: visible;
+	padding: 15px;
+}
+#addModal form .label-wrapper {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+#addModal form .label-wrapper a {
+	opacity: 0.75;
+	font-size: 12px;
+}
+#addModal .modal-dialog{
+	max-width: 650px;
+}
+
+.add-button {
+	margin-bottom: 15px;
+}
+table.table td img {
+	width: 100%;
+	height: auto;
 }

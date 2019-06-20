@@ -2,33 +2,51 @@ const mysql = require('mysql');
 const express = require('express');
 const bodyParser = require('body-parser');
 const dateFormat = require('dateformat');
+const multer = require('multer');
+const path = require('path');
 
 var app = express();
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+
+// Setup storage
+const storage = multer.diskStorage({
+	destination: './public/uploads/',
+	filename: function(req, file, cb) {
+		cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+	}
+});
+
+// Init upload
+const upload = multer({
+	storage: storage
+}).single('picture');
+
 // Import js and css files for Bootstrap
 app.use('/js', express.static(__dirname + '/node_modules/bootstrap/dist/js'));
 app.use('/js', express.static(__dirname + '/node_modules/tether/dist/js'));
 app.use('/js', express.static(__dirname + '/node_modules/jquery/dist'));
+app.use('/js', express.static(__dirname + '/scripts'));
 app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css'));
 app.use('/css', express.static(__dirname + '/styles'));
+app.use('/public/uploads', express.static(__dirname + '/public/uploads'));
 // Configure tamplate engine
 app.set('view engine', 'ejs');
 
 var db_config = {
-  host: 'localhost',
-	user: 'root',
-	password: 'toortest',
-	database: 'dbcoursework'
+  host: 'YOUR_HOST_HERE',
+	user: 'YOUR_USER_HERE',
+	password: 'YOUR_PASSWORD_HERE',
+	database: 'dbcoursework',
+	multipleStatements: true
 };
 
 var mysqlConnection;
 
 function handleDisconnect() {
-  mysqlConnection = mysql.createConnection(db_config); // Recreate the connection, since
-                                                  // the old one cannot be reused.
-
+	mysqlConnection = mysql.createConnection(db_config); // Recreate the connection, since the old one cannot be reused.
+	
   mysqlConnection.connect(function(err) {              // The server is either down
     if(err) {                                     // or restarting (takes a while sometimes).
       console.log('error when connecting to db:', err);
@@ -49,7 +67,7 @@ function handleDisconnect() {
 handleDisconnect();
 
 const siteTitle = "DB COURSEWORK";
-const baseURL = "http://localhost:8080";
+const baseURL = "YOUR_HOST_HERE";
 
 mysqlConnection.connect((err) => {
 	if(!err) {
@@ -85,7 +103,7 @@ app.get('/sells', (req, res) => {
 
 // Render goods page
 app.get('/goods', (req, res) => {
-	mysqlConnection.query('SELECT * FROM clients', (err, rows, fields) => {
+	mysqlConnection.query('SELECT * FROM goods ORDER BY GoodsID DESC', (err, rows, fields) => {
 		if (!err) {
 			res.render('pages/goods', {
 				siteTitle: siteTitle,
@@ -98,6 +116,43 @@ app.get('/goods', (req, res) => {
 		}
 	})
 })
+app.post('/goods/add', (req, res) => {
+	upload(req, res, (err) => {
+		if (!err) {
+			var query = 	'INSERT INTO goods (Goods, Picture, Category, DateStart, Period, Manufacturer, Unit, CostUnit, Count) values(';
+			query +=      "'"+ req.body.goodsName +"', ";
+			query +=      "'"+ req.file.filename +"', ";
+			query +=      "'"+ req.body.category +"', ";
+			query +=      "'"+ dateFormat(req.body.dateStart, "yyyy-mm-dd") +"', ";
+			query +=      + req.body.period +", ";
+			query +=      "'"+ req.body.manufacturer +"', ";
+			query +=      "'"+ req.body.unit +"', ";
+			query +=      + req.body.costUnit + ", ";
+			query +=      + req.body.count;
+			query += 			');';
+			mysqlConnection.query(query, (err, rows, fields) => {
+				if (!err) {
+					res.redirect(baseURL + '/goods')
+					console.log("New row for goods table added. ID:" + rows.insertId);
+				} else {
+					console.log('Error inserting row for goods table: ' + err);
+				}
+			});
+		} else {
+			console.log("Error uploading image on disk: " + err);
+		}
+	});
+})
+// Delete Goods
+app.get('/goods/delete/:id', (req, res) => {
+	mysqlConnection.query('DELETE FROM clients where GoodsID=\'' + req.params.id + '\'', (err, rows) => {
+		if (rows.affectedRows) {
+			res.redirect(baseURL + '/goods')
+		} else {
+			console.log('Error!\n' + err)
+		}
+	});
+});
 
 
 // Render sellers page
@@ -199,14 +254,35 @@ app.get('/test/delete/:id', (req, res) => {
 });
 
 
+// Help Data methods
 app.get('/getHelpData/:type', (req, res) => {
-	mysqlConnection.query('SELECT * FROM ' + req.params.type, (err, rows) => {
-		if (!err) {
-			res.send(rows)
-		} else {
-			console.log('Error fetching banks: ' + err)
-		}
+	if (req.params.type === "all") {
+		var sendObject = {
+			goodsCategories: [],
+			banks: [],
+			manufacturers: [],
+		};
+		mysqlConnection.query('select * from goodsCategories; select * from banks; select * from manufacturers', [1, 2, 3], (err, rows) => {
+			if (!err) {
+				res.send({
+					goodsCategories: rows[0],
+					banks: rows[1],
+					manufacturers: rows[2]
+				});
+				console.log("YASSSS");
+			} else {
+				console.log('Error fetching help data: ' + err)
+			}
 	});
+	} else {
+		mysqlConnection.query('SELECT * FROM ' + req.params.type, (err, rows) => {
+			if (!err) {
+				res.send(rows)
+			} else {
+				console.log('Error fetching help data: ' + err)
+			}
+		});
+	}
 });
 app.post('/addHelpData', (req, res) => {
 	var query = 	'INSERT INTO ' + req.body.target + ' (name) values(';
